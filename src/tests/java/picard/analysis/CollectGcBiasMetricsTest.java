@@ -126,31 +126,61 @@ public class CollectGcBiasMetricsTest extends CommandLineProgramTest {
                 Assert.assertEquals(metrics.ALIGNED_READS, 600);
                 Assert.assertEquals(metrics.AT_DROPOUT, 21.624498);
                 Assert.assertEquals(metrics.GC_DROPOUT, 3.525922);
+                Assert.assertEquals(metrics.GC_NC_0_20, 0.0);
+                Assert.assertEquals(metrics.GC_NC_20_40, 1.06826);
+                Assert.assertEquals(metrics.GC_NC_40_60, 0.989842);
+                Assert.assertEquals(metrics.GC_NC_60_80, 0.0);
+                Assert.assertEquals(metrics.GC_NC_80_100, 0.0);
             } else if (metrics.READ_GROUP != null && metrics.READ_GROUP.equals("TestReadGroup1")) { //Library 1
                 Assert.assertEquals(metrics.TOTAL_CLUSTERS, 100);
                 Assert.assertEquals(metrics.ALIGNED_READS, 200);
                 Assert.assertEquals(metrics.AT_DROPOUT, 23.627784);
                 Assert.assertEquals(metrics.GC_DROPOUT, 2.582877);
+                Assert.assertEquals(metrics.GC_NC_0_20, 0.0);
+                Assert.assertEquals(metrics.GC_NC_20_40, 1.102444);
+                Assert.assertEquals(metrics.GC_NC_40_60, 1.0074);
+                Assert.assertEquals(metrics.GC_NC_60_80, 0.0);
+                Assert.assertEquals(metrics.GC_NC_80_100, 0.0);
             } else if (metrics.READ_GROUP != null && metrics.READ_GROUP.equals("TestReadGroup2")) {//Library 2
                 Assert.assertEquals(metrics.TOTAL_CLUSTERS, 100);
                 Assert.assertEquals(metrics.ALIGNED_READS, 200);
                 Assert.assertEquals(metrics.AT_DROPOUT, 23.784958);
                 Assert.assertEquals(metrics.GC_DROPOUT, 4.025922);
+                Assert.assertEquals(metrics.GC_NC_0_20, 0.0);
+                Assert.assertEquals(metrics.GC_NC_20_40, 1.051167);
+                Assert.assertEquals(metrics.GC_NC_40_60, 0.981063);
+                Assert.assertEquals(metrics.GC_NC_60_80, 0.0);
+                Assert.assertEquals(metrics.GC_NC_80_100, 0.0);
             } else if (metrics.READ_GROUP != null && metrics.READ_GROUP.equals("TestReadGroup3")) {//Library 3
                 Assert.assertEquals(metrics.TOTAL_CLUSTERS, 100);
                 Assert.assertEquals(metrics.ALIGNED_READS, 200);
                 Assert.assertEquals(metrics.AT_DROPOUT, 21.962578);
                 Assert.assertEquals(metrics.GC_DROPOUT, 4.559328);
+                Assert.assertEquals(metrics.GC_NC_0_20, 0.0);
+                Assert.assertEquals(metrics.GC_NC_20_40, 1.051167);
+                Assert.assertEquals(metrics.GC_NC_40_60, 0.981063);
+                Assert.assertEquals(metrics.GC_NC_60_80, 0.0);
+                Assert.assertEquals(metrics.GC_NC_80_100, 0.0);
             } else if (metrics.SAMPLE != null && metrics.SAMPLE.equals("TestSample1")) {//Library 1 and 2
                 Assert.assertEquals(metrics.TOTAL_CLUSTERS, 200);
                 Assert.assertEquals(metrics.ALIGNED_READS, 400);
                 Assert.assertEquals(metrics.AT_DROPOUT, 23.194597);
                 Assert.assertEquals(metrics.GC_DROPOUT, 3.275922);
+                Assert.assertEquals(metrics.GC_NC_0_20, 0.0);
+                Assert.assertEquals(metrics.GC_NC_20_40, 1.076806);
+                Assert.assertEquals(metrics.GC_NC_40_60, 0.994231);
+                Assert.assertEquals(metrics.GC_NC_60_80, 0.0);
+                Assert.assertEquals(metrics.GC_NC_80_100, 0.0);
             } else if (metrics.SAMPLE != null && metrics.SAMPLE.equals("TestSample2")) {//Library 3
                 Assert.assertEquals(metrics.TOTAL_CLUSTERS, 100);
                 Assert.assertEquals(metrics.ALIGNED_READS, 200);
                 Assert.assertEquals(metrics.AT_DROPOUT, 21.962578);
                 Assert.assertEquals(metrics.GC_DROPOUT, 4.559328);
+                Assert.assertEquals(metrics.GC_NC_0_20, 0.0);
+                Assert.assertEquals(metrics.GC_NC_20_40, 1.051167);
+                Assert.assertEquals(metrics.GC_NC_40_60, 0.981063);
+                Assert.assertEquals(metrics.GC_NC_60_80, 0.0);
+                Assert.assertEquals(metrics.GC_NC_80_100, 0.0);
             } else {
                 Assert.fail("Unexpected metric: " + metrics);
             }
