@@ -24,6 +24,7 @@
 
 package picard.analysis;
 
+
 import htsjdk.samtools.SAMReadGroupRecord;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.metrics.MetricsFile;
@@ -231,18 +232,15 @@ public class GcBiasMetricsCollector extends MultiLevelCollector<GcBiasMetrics, I
                     else if (group.equals("Sample")) {summary.SAMPLE = gcType;}
                     else if (group.equals("Library")) {summary.LIBRARY = gcType;}
 
-//TODO: Change gcNormCov calculation function to take in a start and end point and calculate normalized coverage for those two numbers
-                    final ArrayList<Double> gcNormCovIntervals = calculateGcNormCoverage(meanReadsPerWindow, readsByGc);
-
                     summary.ACCUMULATION_LEVEL = group;
                     summary.WINDOW_SIZE = scanWindowSize;
                     summary.TOTAL_CLUSTERS = totalClusters;
                     summary.ALIGNED_READS = totalAlignedReads;
-                    summary.GC_NC_0_20 = gcNormCovIntervals.get(0);
-                    summary.GC_NC_20_40 = gcNormCovIntervals.get(1);
-                    summary.GC_NC_40_60 = gcNormCovIntervals.get(2);
-                    summary.GC_NC_60_80 = gcNormCovIntervals.get(3);
-                    summary.GC_NC_80_100 = gcNormCovIntervals.get(4);
+                    summary.GC_NC_0_20 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 0, 19);
+                    summary.GC_NC_20_40 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 20, 39);
+                    summary.GC_NC_40_60 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 40, 59);
+                    summary.GC_NC_60_80 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 60, 79);
+                    summary.GC_NC_80_100 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 80, 100);
 
 
                     calculateDropoutMetrics(metrics.DETAILS.getMetrics(), summary);
@@ -258,29 +256,21 @@ public class GcBiasMetricsCollector extends MultiLevelCollector<GcBiasMetrics, I
     /////////////////////////////////////////////////////////////////////////////
     // Calculates the normalized coverage over each gc content quintile
     /////////////////////////////////////////////////////////////////////////////
-    private ArrayList<Double> calculateGcNormCoverage(final Double meanReadsPerWindow, final int[] readsByGc) {
-        final ArrayList<Double> gcNormCovIntervals = new ArrayList<Double>();
-        int readStartsTotal = 0;
+    private double calculateGcNormCoverage(final double meanReadsPerWindow, final int[] readsByGc, final int start, final int end) {
         int windowsTotal = 0;
-
-        for (int i = 0; i < windowsByGc.length; i++) {
-            if (i == 0 || i%20 != 0) {
-                readStartsTotal = readStartsTotal + readsByGc[i];
+        double sum = 0.0;
+        for (int i = start; i <= end; i++) {
+            if (windowsByGc[i] != 0) {
+                final double norm = ((double) readsByGc[i] / windowsByGc[i]) / meanReadsPerWindow;
+                sum = sum + (norm*windowsByGc[i]);
                 windowsTotal = windowsTotal + windowsByGc[i];
-            }
-            else {
-                if(windowsTotal == 0) {
-                    gcNormCovIntervals.add(0.0);
-                }
-                else {
-                    gcNormCovIntervals.add((readStartsTotal / (double) windowsTotal) / meanReadsPerWindow);
-                }
-                readStartsTotal = 0;
-                windowsTotal = 0;
             }
         }
 
-        return gcNormCovIntervals;
+        if(windowsTotal == 0) { return 0.0; }
+        else {
+            return (sum / (double) windowsTotal);
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////////
