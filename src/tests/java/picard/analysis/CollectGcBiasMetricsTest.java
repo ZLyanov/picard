@@ -110,8 +110,8 @@ public class CollectGcBiasMetricsTest extends CommandLineProgramTest {
     /////////////////////////////////////////////////////////////////////////////
     @Test
     public void runGcBiasMultiLevelTest() throws IOException {
-        final File outfile = File.createTempFile("test", ".gc_bias_summary_metrics");
-        final File detailsOutfile = File.createTempFile("test", ".gc_bias_detail_metrics");
+        final File outfile = File.createTempFile("test", ".gc_bias.summary_metrics");
+        final File detailsOutfile = File.createTempFile("test", ".gc_bias.detail_metrics");
         outfile.deleteOnExit();
         detailsOutfile.deleteOnExit();
 
