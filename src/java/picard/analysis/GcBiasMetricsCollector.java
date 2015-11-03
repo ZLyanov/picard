@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
-import java.util.ArrayList;
 
 /** Calculates GC Bias Metrics on multiple levels
  *  Created by kbergin on 3/23/15.
@@ -235,10 +234,10 @@ public class GcBiasMetricsCollector extends MultiLevelCollector<GcBiasMetrics, I
                     summary.WINDOW_SIZE = scanWindowSize;
                     summary.TOTAL_CLUSTERS = totalClusters;
                     summary.ALIGNED_READS = totalAlignedReads;
-                    summary.GC_NC_0_20 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 0, 19);
-                    summary.GC_NC_20_40 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 20, 39);
-                    summary.GC_NC_40_60 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 40, 59);
-                    summary.GC_NC_60_80 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 60, 79);
+                    summary.GC_NC_0_19 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 0, 19);
+                    summary.GC_NC_20_39 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 20, 39);
+                    summary.GC_NC_40_59 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 40, 59);
+                    summary.GC_NC_60_79 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 60, 79);
                     summary.GC_NC_80_100 = calculateGcNormCoverage(meanReadsPerWindow, readsByGc, 80, 100);
 
 

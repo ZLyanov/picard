@@ -292,10 +292,10 @@ public class CollectMultipleMetricsTest extends CommandLineProgramTest {
                 Assert.assertEquals(metrics.ALIGNED_READS, 600);
                 Assert.assertEquals(metrics.AT_DROPOUT, 7.234062);
                 Assert.assertEquals(metrics.GC_DROPOUT, 4.086217);
-                Assert.assertEquals(metrics.GC_NC_0_20, 0.0);
-                Assert.assertEquals(metrics.GC_NC_20_40, 1.06826);
-                Assert.assertEquals(metrics.GC_NC_40_60, 0.987036);
-                Assert.assertEquals(metrics.GC_NC_60_80, 0.0);
+                Assert.assertEquals(metrics.GC_NC_0_19, 0.0);
+                Assert.assertEquals(metrics.GC_NC_20_39, 1.06826);
+                Assert.assertEquals(metrics.GC_NC_40_59, 0.987036);
+                Assert.assertEquals(metrics.GC_NC_60_79, 0.0);
                 Assert.assertEquals(metrics.GC_NC_80_100, 0.0);
             } else {
                 Assert.fail("Unexpected metric: " + metrics);
