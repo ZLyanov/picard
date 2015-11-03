@@ -24,7 +24,6 @@
 
 package picard.analysis;
 
-
 import htsjdk.samtools.SAMReadGroupRecord;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.metrics.MetricsFile;
