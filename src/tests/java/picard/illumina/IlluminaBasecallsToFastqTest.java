@@ -45,6 +45,7 @@ public class IlluminaBasecallsToFastqTest extends CommandLineProgramTest {
     private static final File BASECALLS_DIR = new File("testdata/picard/illumina/25T8B25T/Data/Intensities/BaseCalls");
     private static final File DUAL_BASECALLS_DIR = new File("testdata/picard/illumina/25T8B8B25T/Data/Intensities/BaseCalls");
     private static final File TEST_DATA_DIR = new File("testdata/picard/illumina/25T8B25T/fastq");
+    private static final File TEST_DATA_DIR_WITH_4M = new File("testdata/picard/illumina/25T8B25T/fastq_with_4M");
     private static final File DUAL_TEST_DATA_DIR = new File("testdata/picard/illumina/25T8B8B25T/fastq");
 
     public String getCommandLineProgramName() {
@@ -111,6 +112,11 @@ public class IlluminaBasecallsToFastqTest extends CommandLineProgramTest {
     @Test
     public void testDeMultiplexed() throws Exception {
         runStandardTest(1, "multiplexedBarcode.", "mp_barcode.params", 1, "25T8B25T", BASECALLS_DIR, TEST_DATA_DIR);
+    }
+
+    @Test
+    public void testDeMultiplexedWithIndex() throws Exception {
+        runStandardTest(1, "multiplexedBarcodeWithIndex.", "mp_barcode.params", 1, "25T8B4M21T", BASECALLS_DIR, TEST_DATA_DIR_WITH_4M);
     }
 
     @Test
@@ -181,6 +187,10 @@ public class IlluminaBasecallsToFastqTest extends CommandLineProgramTest {
                 }
                 for (int i = 1; i <= readStructure.barcodes.length(); ++i) {
                     final String filename = outputSam.getName() + ".barcode_" + i + ".fastq";
+                    IOUtil.assertFilesEqual(new File(outputSam.getParentFile(), filename), new File(testDataDir, filename));
+                }
+                for (int i = 1; i <= readStructure.molecularIndexes.length(); ++i) {
+                    final String filename = outputSam.getName() + ".index_" + i + ".fastq";
                     IOUtil.assertFilesEqual(new File(outputSam.getParentFile(), filename), new File(testDataDir, filename));
                 }
             }
