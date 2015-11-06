@@ -63,6 +63,8 @@ public class ReadStructure {
 
     public final Substructure barcodes;
     public final Substructure templates;
+    public final Substructure molecularIndexes;
+
     public final Substructure skips;
 
     //nonSkips include barcode and template indices in the order they appear in the descriptors list
@@ -115,6 +117,8 @@ public class ReadStructure {
         final List<Integer> nonSkipIndicesList  = new ArrayList<Integer>();
         final List<Integer> barcodeIndicesList  = new ArrayList<Integer>();
         final List<Integer> templateIndicesList = new ArrayList<Integer>();
+        final List<Integer> molecularIndexIndicesList = new ArrayList<Integer>();
+
         final List<Integer> skipIndicesList     = new ArrayList<Integer>();
         readLengths = new int[collection.size()];
 
@@ -143,6 +147,10 @@ public class ReadStructure {
                 case S:
                     skipIndicesList.add(descIndex);
                     break;
+                case M:
+                    nonSkipIndicesList.add(descIndex);
+                    molecularIndexIndicesList.add(descIndex);
+                    break;
 
                 default:
                     throw new IllegalArgumentException("Unsupported ReadType (" + desc.type + ") encountered by IlluminaRunConfiugration!");
@@ -150,11 +158,12 @@ public class ReadStructure {
             ++descIndex;
         }
 
-        this.totalCycles    = cycles;
-        this.barcodes       = new Substructure(barcodeIndicesList,  allRanges);
-        this.templates      = new Substructure(templateIndicesList, allRanges);
-        this.skips          = new Substructure(skipIndicesList,     allRanges);
-        this.nonSkips       = new Substructure(nonSkipIndicesList,  allRanges);
+        this.totalCycles      = cycles;
+        this.barcodes         = new Substructure(barcodeIndicesList,        allRanges);
+        this.templates        = new Substructure(templateIndicesList,       allRanges);
+        this.skips            = new Substructure(skipIndicesList,           allRanges);
+        this.molecularIndexes = new Substructure(molecularIndexIndicesList, allRanges);
+        this.nonSkips         = new Substructure(nonSkipIndicesList,        allRanges);
     }
 
     /**

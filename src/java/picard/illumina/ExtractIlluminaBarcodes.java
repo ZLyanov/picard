@@ -323,11 +323,11 @@ public class ExtractIlluminaBarcodes extends CommandLineProgram {
         this.bclQualityEvaluationStrategy = new BclQualityEvaluationStrategy(MINIMUM_QUALITY);
 
         /**
-         * In extract illumina barcodes we NEVER want to look at the template reads, therefore replace them with skips because
-         * IlluminaDataProvider and its factory will not open these nor produce ClusterData with the template reads in them, thus reducing
-         * the file IO and value copying done by the data provider
+         * In extract illumina barcodes we NEVER want to look at the template reads, or the molecular indicies, therefore replace them with
+         * skips because IlluminaDataProvider and its factory will not open these nor produce ClusterData with the template reads in them,
+         * thus reducing the file IO and value copying done by the data provider
          */
-        readStructure = new ReadStructure(READ_STRUCTURE.replaceAll("T", "S"));
+        readStructure = new ReadStructure(READ_STRUCTURE.replaceAll("T|M", "S"));
         final IlluminaDataType[] datatypes = (MINIMUM_BASE_QUALITY > 0) ?
                 new IlluminaDataType[]{IlluminaDataType.BaseCalls, IlluminaDataType.PF, IlluminaDataType.QualityScores} :
                 new IlluminaDataType[]{IlluminaDataType.BaseCalls, IlluminaDataType.PF};

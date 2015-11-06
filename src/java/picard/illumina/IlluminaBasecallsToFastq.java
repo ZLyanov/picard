@@ -242,7 +242,7 @@ public class IlluminaBasecallsToFastq extends CommandLineProgram {
                 barcodeFastqWriterMap, demultiplex, MAX_READS_IN_RAM_PER_TILE/readsPerCluster, TMP_DIR, NUM_PROCESSORS,
                 FORCE_GC, FIRST_TILE, TILE_LIMIT, queryNameComparator,
                 new FastqRecordsForClusterCodec(readStructure.templates.length(),
-                readStructure.barcodes.length()), FastqRecordsForCluster.class, bclQualityEvaluationStrategy,
+                readStructure.barcodes.length(),readStructure.molecularIndexes.length()), FastqRecordsForCluster.class, bclQualityEvaluationStrategy,
                 this.APPLY_EAMSS_FILTER, INCLUDE_NON_PF_READS, IGNORE_UNEXPECTED_BARCODES);
 
         log.info("READ STRUCTURE IS " + readStructure.toString());
@@ -323,15 +323,23 @@ public class IlluminaBasecallsToFastq extends CommandLineProgram {
         final String suffixString = COMPRESS_OUTPUTS ? "fastq.gz" : "fastq";
         final FastqWriter[] templateWriters = new FastqWriter[readStructure.templates.length()];
         final FastqWriter[] barcodeWriters = new FastqWriter[readStructure.barcodes.length()];
+        final FastqWriter[] indexWriters = new FastqWriter[readStructure.molecularIndexes.length()];
+
         for (int i = 0; i < templateWriters.length; ++i) {
             final String filename = String.format("%s.%d.%s", prefixString, i+1, suffixString);
             templateWriters[i] = fastqWriterFactory.newWriter(new File(outputDir, filename));
         }
+
         for (int i = 0; i < barcodeWriters.length; ++i) {
             final String filename = String.format("%s.barcode_%d.%s", prefixString, i+1, suffixString);
             barcodeWriters[i] = fastqWriterFactory.newWriter(new File(outputDir, filename));
         }
-        return new FastqRecordsWriter(templateWriters, barcodeWriters);
+
+        for (int i = 0; i < indexWriters.length; ++i) {
+            final String filename = String.format("%s.index_%d.%s", prefixString, i+1, suffixString);
+            indexWriters[i] = fastqWriterFactory.newWriter(new File(outputDir, filename));
+        }
+        return new FastqRecordsWriter(templateWriters, barcodeWriters, indexWriters);
     }
 
     public static void main(final String[] args) {
@@ -344,20 +352,24 @@ public class IlluminaBasecallsToFastq extends CommandLineProgram {
     private static class FastqRecordsWriter implements IlluminaBasecallsConverter.ConvertedClusterDataWriter<FastqRecordsForCluster> {
         final FastqWriter[] templateWriters;
         final FastqWriter[] barcodeWriters;
+        final FastqWriter[] indexWriters;
 
         /**
          * @param templateWriters Writers for template reads in order, e,g. 0th element is for template read 1.
          * @param barcodeWriters Writers for barcode reads in order, e,g. 0th element is for barcode read 1.
+         * @param barcodeWriters Writers for (molecular) index reads in order, e,g. 0th element is for index read 1.
          */
-        private FastqRecordsWriter(final FastqWriter[] templateWriters, final FastqWriter[] barcodeWriters) {
+        private FastqRecordsWriter(final FastqWriter[] templateWriters, final FastqWriter[] barcodeWriters, final FastqWriter[] indexWriters) {
             this.templateWriters = templateWriters;
             this.barcodeWriters = barcodeWriters;
+            this.indexWriters = indexWriters;
         }
 
         @Override
         public void write(final FastqRecordsForCluster records) {
             write(templateWriters, records.templateRecords);
             write(barcodeWriters, records.barcodeRecords);
+            write(indexWriters, records.indexRecords);
         }
 
         private void write(final FastqWriter[] writers, final FastqRecord[] records) {
@@ -374,6 +386,9 @@ public class IlluminaBasecallsToFastq extends CommandLineProgram {
             for (final FastqWriter writer : barcodeWriters) {
                 writer.close();
             }
+            for (final FastqWriter writer : indexWriters) {
+                writer.close();
+            }
         }
     }
 
@@ -384,10 +399,12 @@ public class IlluminaBasecallsToFastq extends CommandLineProgram {
         // These are accessed directly by converter and writer rather than through getters and setters.
         final FastqRecord[] templateRecords;
         final FastqRecord[] barcodeRecords;
+        final FastqRecord[] indexRecords;
 
-        FastqRecordsForCluster(final int numTemplates, final int numBarcodes) {
+        FastqRecordsForCluster(final int numTemplates, final int numBarcodes, final int numIndexes) {
             templateRecords = new FastqRecord[numTemplates];
             barcodeRecords = new FastqRecord[numBarcodes];
+            indexRecords = new FastqRecord[numIndexes];
         }
     }
 
@@ -399,18 +416,24 @@ public class IlluminaBasecallsToFastq extends CommandLineProgram {
 
         private final int [] templateIndices;
         private final int [] barcodeIndices;
+        private final int [] indexIndicies;
 
         ClusterToFastqRecordsForClusterConverter(final ReadStructure outputReadStructure) {
             this.templateIndices = outputReadStructure.templates.getIndices();
             this.barcodeIndices = outputReadStructure.barcodes.getIndices();
+            this.indexIndicies = outputReadStructure.molecularIndexes.getIndices();
         }
 
         @Override
         public FastqRecordsForCluster convertClusterToOutputRecord(final ClusterData cluster) {
-            final FastqRecordsForCluster ret = new FastqRecordsForCluster(readStructure.templates.length(), readStructure.barcodes.length());
-            final boolean appendReadNumberSuffix = ret.templateRecords.length > 1;
-            makeFastqRecords(ret.templateRecords, templateIndices, cluster, appendReadNumberSuffix);
+            final FastqRecordsForCluster ret = new FastqRecordsForCluster(readStructure.templates.length(), readStructure.barcodes.length(), readStructure.molecularIndexes.length());
+            final boolean appendTemplateNumberSuffix = ret.templateRecords.length > 1;
+            final boolean appendIndexNumberSuffix = ret.indexRecords.length > 1;
+
+            makeFastqRecords(ret.templateRecords, templateIndices, cluster, appendTemplateNumberSuffix);
             makeFastqRecords(ret.barcodeRecords, barcodeIndices, cluster, false);
+            makeFastqRecords(ret.indexRecords, indexIndicies, cluster, appendIndexNumberSuffix);
+
             return ret;
         }
 
@@ -436,12 +459,15 @@ public class IlluminaBasecallsToFastq extends CommandLineProgram {
     static class FastqRecordsForClusterCodec implements SortingCollection.Codec<FastqRecordsForCluster> {
         private final int numTemplates;
         private final int numBarcodes;
+        private final int numIndexes;
+
         private BasicFastqWriter writer = null;
         private FastqReader reader = null;
 
-        FastqRecordsForClusterCodec(final int numTemplates, final int numBarcodes) {
+        FastqRecordsForClusterCodec(final int numTemplates, final int numBarcodes, final int numIndexes) {
             this.numTemplates = numTemplates;
             this.numBarcodes = numBarcodes;
+            this.numIndexes = numIndexes;
         }
 
         @Override
@@ -472,9 +498,10 @@ public class IlluminaBasecallsToFastq extends CommandLineProgram {
         @Override
         public FastqRecordsForCluster decode() {
             if (!reader.hasNext()) return null;
-            final FastqRecordsForCluster ret = new FastqRecordsForCluster(numTemplates, numBarcodes);
+            final FastqRecordsForCluster ret = new FastqRecordsForCluster(numTemplates, numBarcodes, numIndexes);
             decodeArray(ret.templateRecords);
             decodeArray(ret.barcodeRecords);
+            decodeArray(ret.indexRecords);
             return ret;
         }
 
@@ -486,7 +513,7 @@ public class IlluminaBasecallsToFastq extends CommandLineProgram {
 
         @Override
         public SortingCollection.Codec<FastqRecordsForCluster> clone() {
-            return new FastqRecordsForClusterCodec(numTemplates, numBarcodes);
+            return new FastqRecordsForClusterCodec(numTemplates, numBarcodes, numIndexes);
         }
     }
 }
