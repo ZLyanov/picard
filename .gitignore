@@ -11,3 +11,5 @@ intellij.classes
 htsjdk
 .idea
 target
+/build
+.gradle/

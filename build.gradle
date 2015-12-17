@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '1.2.2'
+}
+
+group = 'com.github.samtools'
+version = "1.140.m_EstimateLibraryComplexity-SNAPSHOT"
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+targetCompatibility = "1.7"
+sourceCompatibility = "1.7"
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java'
+        }
+    }
+    test{
+        java {
+            srcDir 'src/tests/java'
+        }
+        resources {
+            srcDirs =  ['src/tests/resources', 'src/scripts', 'src/tests/scripts', 'testdata']
+        }
+    }
+}
+
+dependencies {
+    compile "$group:htsjdk:$version"
+    compile files('lib/ant/bcel-5.2.jar', 'lib/guava-15.0.jar')
+    compile files("${System.getProperty('java.home')}/../lib/tools.jar")
+    compile files('lib/commons-jexl-2.1.1.jar')
+    compile files('lib/snappy-java-1.0.3-rc3.jar')
+    compile "org.testng:testng:6.9.9"
+    testRuntime files('lib/commons-compress-1.4.1.jar', 'lib/apache-ant-1.8.2-bzip2.jar')
+}
+
+jar {
+    manifest {
+        attributes(
+                "Implementation-Title": "PICARD Tools",
+                "Implementation-Version": version,
+                "Main-Class": "picard.cmdline.PicardCommandLine"
+        )
+    }
+}
+
+shadowJar{
+    archiveName = "picard-tools-all.jar"
+}
+
+test {
+    useTestNG {
+        excludeGroups = ['slow', 'broken', 'unix']
+    }
+    testLogging.showStandardStreams = false
+}
